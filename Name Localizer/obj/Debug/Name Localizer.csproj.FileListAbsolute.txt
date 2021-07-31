@@ -1,0 +1,10 @@
+G:\Visual Projects\Name Localizer\Name Localizer\bin\Debug\Name Localizer.exe.config
+G:\Visual Projects\Name Localizer\Name Localizer\bin\Debug\Name Localizer.exe
+G:\Visual Projects\Name Localizer\Name Localizer\bin\Debug\Name Localizer.pdb
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name Localizer.csprojAssemblyReference.cache
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name_Localizer.Form1.resources
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name_Localizer.Properties.Resources.resources
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name Localizer.csproj.GenerateResource.cache
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name Localizer.csproj.CoreCompileInputs.cache
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name Localizer.exe
+G:\Visual Projects\Name Localizer\Name Localizer\obj\Debug\Name Localizer.pdb
