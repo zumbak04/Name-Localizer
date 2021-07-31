@@ -14,13 +14,16 @@ namespace Name_Localizer
         static string CK3Path = @"C:\Users\zumba\Documents\Paradox Interactive\Crusader Kings III\mod\Warcraft-Guardians-of-Azeroth-2";
         static string culturesPath = @"\common\culture\cultures";
         static string charactersPath = @"\history\characters";
-        static string namesPath = @"\localization\english\names\wc_character_names_l_english.yml";
+        static string nameFilePath = @"\localization\english\names\wc_character_names_l_english.yml";
+        static string dynastyFilePath = @"\localization\english\dynasties\wc_dynasty_names_l_english.yml";
 
         static string enclosedContentPattern = @"\s*=\s*\{)(?>\{(?<c>)|[^{}]+|\}(?<-c>))*(?(c)(?!))(?=\})";
         static string maleNames = "(?<=male_names";
         static string femaleNames = "(?<=female_names";
-        static string namePattern = @"[^\s" + "^\"]+";
-        static string historyNamePattern = @"(?<=\bname\b\s*=\s*" + "\"*)" + namePattern;
+        static string cadetDynastyNames = "(?<=cadet_dynasty_names";
+        static string dynastyNames = "(?<=dynasty_names";
+        static string namePattern = @"[^\s""]+";
+        static string historyNamePattern = @"(?<=\bname\b\s*=\s*""+)" + namePattern;
 
         static Regex notCommentedLineRegex = new Regex(@"(?<!#[^#]*)[^#]+");
         static Regex emptyLine = new Regex(@"^\s*\r\n");
@@ -35,62 +38,76 @@ namespace Name_Localizer
             DirectoryInfo charactersFolder = new DirectoryInfo(CK3Path + charactersPath);
 
             List<string> nameList = new List<string>();
+            List<string> dynastyList = new List<string>();
 
-            string newFile = File.ReadAllText(CK3Path + namesPath);
+            string nameNewFile = File.ReadAllText(CK3Path + nameFilePath);
+            string dynastyNewFile = File.ReadAllText(CK3Path + dynastyFilePath);
 
             if (culturesFolder.Exists)
             {
                 foreach (FileInfo file in culturesFolder.EnumerateFiles("*.txt"))
                 {
-                    nameList.AddRange(ReadNames(file.FullName, false));
+                    List<string> outDynastyList;
+                    nameList.AddRange(ReadNames(file, false, out outDynastyList));
+                    dynastyList.AddRange(outDynastyList);
                 }
             }
             if (charactersFolder.Exists)
             {
                 foreach (FileInfo file in charactersFolder.EnumerateFiles("*.txt"))
                 {
-                    nameList.AddRange(ReadNames(file.FullName, true));
+                    List<string> outDynastyList;
+                    nameList.AddRange(ReadNames(file, true, out outDynastyList));
+                    dynastyList.AddRange(outDynastyList);
                 }
             }
 
-            //nameList.Sort();
-            List<string> sortedList = nameList.Distinct().ToList();
-            Debug.WriteLine($"Found {sortedList.Count} name(s) total");
-            foreach (string name in sortedList)
+            nameList = nameList.Distinct().ToList();
+
+            Debug.WriteLine($"Found {nameList.Count} and {dynastyList.Count} dynast(y/ies) name(s) total");
+
+            foreach (string name in nameList)
             {
-                if (!newFile.Contains($"\"{name}\""))
-                {
-                    newFile += $" {name}:0 \"{name}\"{NewLine}";
-                }
+                if (!nameNewFile.Contains($"{name}:"))
+                    nameNewFile += $" {name}:0 \"{name}\"{NewLine}";
+            }
+            foreach (string dynasty in dynastyList)
+            {
+                if (!dynastyNewFile.Contains($"{dynasty}:"))
+                    dynastyNewFile += $" {dynasty}:0 \"{dynasty}\"{NewLine}";
             }
 
-            File.WriteAllText(CK3Path + namesPath, newFile, fileEncoding);
+            File.WriteAllText(CK3Path + nameFilePath, nameNewFile, fileEncoding);
+            File.WriteAllText(CK3Path + dynastyFilePath, dynastyNewFile, fileEncoding);
 
             Debug.WriteLine($"Done!");
         }
-        static List<string> ReadNames(string file, bool history)
+        static List<string> ReadNames(FileInfo file, bool isHistory, out List<string> dynastyList)
         {
             string fileContent = "";
             string names = "";
+            string dynasties = "";
 
-            fileContent = FileReader.ReadIgnoringComments(File.ReadAllText(file));
+            fileContent = FileReader.ReadIgnoringComments(File.ReadAllText(file.FullName));
             if (fileContent != null)
             {
                 foreach(Match match in Regex.Matches(fileContent, maleNames + enclosedContentPattern))
                     names += match.Value + Environment.NewLine;
                 foreach (Match match in Regex.Matches(fileContent, femaleNames + enclosedContentPattern))
                     names += match.Value + Environment.NewLine;
-                if (history)
-                {
+                if(isHistory)
                     foreach (Match match in Regex.Matches(fileContent, historyNamePattern))
                         names += match.Value + Environment.NewLine;
-                }
+                foreach (Match match in Regex.Matches(fileContent, dynastyNames + enclosedContentPattern))
+                    dynasties += match.Value + Environment.NewLine;
+                foreach (Match match in Regex.Matches(fileContent, cadetDynastyNames + enclosedContentPattern))
+                    dynasties += match.Value + Environment.NewLine;
             }
 
-            Debug.WriteLine(names);
-
             List<string> nameList = Regex.Matches(names, namePattern).Cast<Match>().Select(match => match.Value).ToList();
-            Debug.WriteLine($"Found {nameList.Count} name(s) in {file}");
+            dynastyList = Regex.Matches(dynasties, namePattern).Cast<Match>().Select(match => match.Value).ToList();
+
+            Debug.WriteLine($"Found {nameList.Count} name(s) and {dynastyList.Count} dynast(y/ies) in {file.Name}");
 
             return nameList;
         }
